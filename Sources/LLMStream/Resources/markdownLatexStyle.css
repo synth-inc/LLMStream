@@ -3,51 +3,53 @@ body {
     height: auto;
     overflow: visible;
     position: relative;
-    background-color: transparent;
-    color: white;
-    font-size: var(--code-font-size);
-    line-height: var(--code-line-height);
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-    padding: 0;
+    background-color: var(--background-color);
+    color: var(--text-color);
+    font-size: var(--font-size);
+    line-height: var(--line-height);
+    font-family: var(--font-family);
+    padding: var(--content-padding);
 }
 
 pre {
     background: transparent;
-    color: white;
-    padding: 10px;
-    border-radius: 5px;
+    color: var(--text-color);
+    padding: var(--code-padding);
+    border-radius: var(--corner-radius);
     position: relative;
     overflow: auto;
 }
 
 .code-container {
-    margin: 0.5em 0;
-    border-radius: 8px;
+    margin: var(--spacing) 0;
+    border-radius: var(--corner-radius);
     overflow: hidden;
-    background: transparent;
-    border: 1px solid #3E3E3E;
+    background: var(--code-background-color);
+    border: 1px solid var(--code-border-color);
 }
 
 .code-title-bar {
-    display: flex;
+    display: var(--show-language);
     align-items: center;
     justify-content: space-between;
     padding: 8px 12px;
     background: transparent;
-    border-bottom: 1px solid #3E3E3E;
+    border-bottom: 1px solid var(--code-border-color);
 }
     
 .code-title-bar .language {
-    color: #808080;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-    font-size: 13px;
+    color: var(--text-color);
+    font-family: var(--font-family);
+    font-size: var(--language-text-size);
     text-transform: lowercase;
+    opacity: 0.6;
 }
 
 .code-title-bar .copy-button {
-    width: 16px;
-    height: 16px;
-    opacity: 0.5;
+    display: var(--show-copy-button);
+    width: var(--copy-button-size);
+    height: var(--copy-button-size);
+    opacity: var(--copy-button-opacity);
     cursor: pointer;
     background-image: url('copy.svg');
     background-size: contain;
@@ -55,7 +57,7 @@ pre {
 }
 
 .code-title-bar .copy-button:hover {
-    opacity: 1;
+    opacity: var(--copy-button-hover-opacity);
 }
 
 .code-title-bar .copy-button:active {
@@ -64,7 +66,7 @@ pre {
 
 .code-content {
     margin: 0;
-    padding: 12px 16px;
+    padding: var(--code-padding);
 }
 
 .code-content ::-webkit-scrollbar {
@@ -79,10 +81,10 @@ pre {
 }
 
 code {
-    color: #FC5FA3;
-    font-family: "SF Mono", Monaco, Menlo, Consolas, "Ubuntu Mono", monospace;
-    font-size: var(--code-font-size);
-    line-height: var(--code-line-height);
+    color: var(--text-color);
+    font-family: var(--code-font-family);
+    font-size: var(--font-size);
+    line-height: var(--line-height);
     font-weight: medium;
     min-width: fit-content;
 }
@@ -95,28 +97,18 @@ code .plaintext {
     font-weight: normal;
 }
 
-.math {
-    color: white;
-}
-
-.MathJax {
-    color: white !important;
-}
-
-mjx-container {
-    color: white !important;
-}
-
-mjx-math {
-    color: white !important;
+.math, .MathJax, mjx-container, mjx-math {
+    color: var(--text-color) !important;
+    font-family: var(--math-font-family) !important;
 }
 
 mjx-container mjx-mtable[data-labels] {
-    color: rgba(255, 255, 255, 0.8) !important;
+    color: var(--text-color) !important;
+    opacity: 0.8;
 }
 
 a.mjx-eqn-link {
-    color: #4a9eff !important;
+    color: var(--link-color) !important;
     text-decoration: none;
 }
 
@@ -132,19 +124,19 @@ mjx-container[display="true"] {
 }
 
 .theorem, .lemma, .corollary, .definition {
-    margin: 1.5em 0;
+    margin: calc(var(--spacing) * 1.5) 0;
     padding: 0.8em 1em;
-    border-left: 4px solid #3a7bd5;
-    background-color: rgba(58, 123, 213, 0.1);
-    border-radius: 4px;
+    border-left: 4px solid var(--theorem-border-color);
+    background-color: var(--code-background-color);
+    border-radius: var(--theorem-corner-radius);
 }
 
 .proof {
-    margin: 1em 0;
+    margin: var(--spacing) 0;
     padding: 0.5em 1em;
-    border-left: 4px solid #777;
-    background-color: rgba(120, 120, 120, 0.1);
-    border-radius: 4px;
+    border-left: 4px solid var(--proof-border-color);
+    background-color: var(--code-background-color);
+    border-radius: var(--theorem-corner-radius);
 }
 
 .latex-figure {
@@ -188,6 +180,24 @@ mjx-container[display="true"] {
 
 ul, ol {
     padding-left: 1.5em;
+    counter-reset: item;
+    list-style-type: decimal;
+}
+
+ol > li {
+    display: block;
+    position: relative;
+    padding-left: 0.5em;
+}
+
+ol > li:before {
+    content: counter(item) ".";
+    counter-increment: item;
+    position: absolute;
+    left: -1.5em;
+    width: 1.5em;
+    text-align: right;
+    color: white;
 }
 
 li {
@@ -217,15 +227,9 @@ li {
     margin-top: 0.75em;
     text-align: center;
     font-style: italic;
-    color: #ccc;
-    font-size: 0.9em;
-}
-
-.latex-content {
-    display: flex;
-    width: 100%;
-    justify-content: space-between;
-    align-items: center;
+    color: var(--table-caption-color);
+    font-size: var(--table-caption-font-size);
+    display: var(--show-caption);
 }
 
 .hfill-container {
@@ -244,26 +248,28 @@ li {
 
 table {
     border-collapse: collapse;
-    margin: 1em 0;
+    margin: var(--spacing) 0;
     width: 100%;
     background-color: transparent;
-    border-radius: 5px;
+    border-radius: var(--table-corner-radius);
     overflow: hidden;
     table-layout: auto;
     border: none;
+    font-family: var(--table-font-family);
 }
 
 tr:first-child th {
-    border-top: 2px solid #888;
-    border-bottom: 1px solid #888;
-    font-weight: bold;
-    background-color: rgba(60, 60, 60, 0.5);
-    color: #fff;
-    padding: 10px 8px;
+    border-top: var(--table-header-border-width) solid var(--table-border-color);
+    border-bottom: 1px solid var(--table-border-color);
+    font-weight: var(--table-header-font-weight);
+    background-color: var(--table-header-background-color);
+    color: var(--text-color);
+    padding: var(--table-padding);
+    text-align: var(--table-header-text-align);
 }
 
 tr:last-child td {
-    border-bottom: 2px solid #888;
+    border-bottom: var(--table-header-border-width) solid var(--table-border-color);
 }
 
 .midrule-after td {
@@ -271,32 +277,35 @@ tr:last-child td {
 }
 
 td, th {
-    border: 1px solid #666;
-    padding: 8px;
+    border: 1px solid var(--table-border-color);
+    padding: var(--table-padding);
     text-align: left;
     vertical-align: top;
+    font-family: var(--table-font-family);
 }
 
 th {
-    background-color: rgba(60, 60, 60, 0.4);
-    font-weight: bold;
-    text-align: center;
+    background-color: var(--table-header-background-color);
+    font-weight: var(--table-header-font-weight);
+    text-align: var(--table-header-text-align);
 }
 
 tr:nth-child(even) {
-    background-color: rgba(50, 50, 50, 0.2);
+    background-color: var(--table-row-even-color);
+    display: var(--enable-zebra-stripes);
 }
 
 tr:hover {
-    background-color: rgba(70, 70, 70, 0.3);
+    background-color: var(--table-row-hover-color);
+    display: var(--enable-hover);
 }
 
 td, th {
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'STIX Two Math', 'Latin Modern Math', serif;
+    font-family: var(--table-font-family);
 }
 
 .derivative-symbol {
-    font-family: 'STIX Two Math', 'Latin Modern Math', serif;
+    font-family: var(--math-font-family);
     font-style: normal;
 }
 
@@ -317,6 +326,8 @@ u {
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     transition: box-shadow 0.3s ease;
     overflow: hidden;
+    border-radius: var(--corner-radius);
+    margin: var(--spacing) 0;
 }
 
 .tcolorbox:hover {
@@ -325,10 +336,12 @@ u {
 
 .tcolorbox-title {
     font-size: 1.1em;
+    padding: var(--code-padding);
 }
 
 .tcolorbox-content {
-    line-height: 1.6;
+    line-height: var(--line-height);
+    padding: var(--code-padding);
 }
 
 /* Pour les variantes courantes */

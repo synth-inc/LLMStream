@@ -4,26 +4,28 @@
 import PackageDescription
 
 let package = Package(
-    name: "MarkdownLatex",
+    name: "LLMStream",
     platforms: [
         .macOS(.v12)
     ],
     products: [
         .library(
-            name: "MarkdownLatex",
-            targets: ["MarkdownLatex"]
+            name: "LLMStream",
+            targets: ["LLMStream"]
         ),
     ],
     dependencies: [],
     targets: [
         .target(
-            name: "MarkdownLatex",
+            name: "LLMStream",
             dependencies: [],
-            resources: [.process("Renderer.js")] // Inclure le script JS
+            resources: [
+                .process("Resources")
+            ]
         ),
         .testTarget(
-            name: "MarkdownLatexTests",
-            dependencies: ["MarkdownLatex"]
+            name: "LLMStreamTests",
+            dependencies: ["LLMStream"]
         ),
     ]
 )

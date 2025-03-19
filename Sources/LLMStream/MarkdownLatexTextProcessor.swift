@@ -1,6 +1,6 @@
 //
 //  MarkdownLatexTextProcessor.swift
-//  Synth, Inc
+//  MarkdownLatexWebview
 //
 //  Created by Kévin Naudin on 17/03/2025.
 //
