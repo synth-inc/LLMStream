@@ -1,0 +1,353 @@
+body {
+    margin: 0;
+    height: auto;
+    overflow: visible;
+    position: relative;
+    background-color: transparent;
+    color: white;
+    font-size: var(--code-font-size);
+    line-height: var(--code-line-height);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    padding: 0;
+}
+
+pre {
+    background: transparent;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    position: relative;
+    overflow: auto;
+}
+
+.code-container {
+    margin: 0.5em 0;
+    border-radius: 8px;
+    overflow: hidden;
+    background: transparent;
+    border: 1px solid #3E3E3E;
+}
+
+.code-title-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: transparent;
+    border-bottom: 1px solid #3E3E3E;
+}
+    
+.code-title-bar .language {
+    color: #808080;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-size: 13px;
+    text-transform: lowercase;
+}
+
+.code-title-bar .copy-button {
+    width: 16px;
+    height: 16px;
+    opacity: 0.5;
+    cursor: pointer;
+    background-image: url('copy.svg');
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.code-title-bar .copy-button:hover {
+    opacity: 1;
+}
+
+.code-title-bar .copy-button:active {
+    transform: scale(1.2);
+}
+
+.code-content {
+    margin: 0;
+    padding: 12px 16px;
+}
+
+.code-content ::-webkit-scrollbar {
+    display: none;
+}
+
+pre {
+    margin: 0;
+    padding: 0;
+    background: transparent;
+    overflow-x: auto;
+}
+
+code {
+    color: #FC5FA3;
+    font-family: "SF Mono", Monaco, Menlo, Consolas, "Ubuntu Mono", monospace;
+    font-size: var(--code-font-size);
+    line-height: var(--code-line-height);
+    font-weight: medium;
+    min-width: fit-content;
+}
+
+code .plaintext {
+    color: white;
+    font-family: "SF Mono", Monaco, Menlo, Consolas, "Ubuntu Mono", monospace;
+    font-size: var(--code-font-size);
+    line-height: var(--code-line-height);
+    font-weight: normal;
+}
+
+.math {
+    color: white;
+}
+
+.MathJax {
+    color: white !important;
+}
+
+mjx-container {
+    color: white !important;
+}
+
+mjx-math {
+    color: white !important;
+}
+
+mjx-container mjx-mtable[data-labels] {
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+a.mjx-eqn-link {
+    color: #4a9eff !important;
+    text-decoration: none;
+}
+
+a.mjx-eqn-link:hover {
+    text-decoration: underline;
+}
+
+mjx-container[display="true"] {
+    margin: 1em 0 !important;
+    padding: 0.5em 0 !important;
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.theorem, .lemma, .corollary, .definition {
+    margin: 1.5em 0;
+    padding: 0.8em 1em;
+    border-left: 4px solid #3a7bd5;
+    background-color: rgba(58, 123, 213, 0.1);
+    border-radius: 4px;
+}
+
+.proof {
+    margin: 1em 0;
+    padding: 0.5em 1em;
+    border-left: 4px solid #777;
+    background-color: rgba(120, 120, 120, 0.1);
+    border-radius: 4px;
+}
+
+.latex-figure {
+    margin: 2em auto;
+    text-align: center;
+    max-width: 100%;
+}
+
+.latex-figure img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 0 auto;
+}
+
+.latex-figure figcaption {
+    text-align: center;
+    font-style: italic;
+    margin-top: 1em;
+    font-size: 0.9em;
+}
+
+.subfigure {
+    display: inline-block;
+    margin: 0.5em;
+    text-align: center;
+    vertical-align: top;
+    max-width: 45%;
+}
+
+.subfigure img {
+    max-width: 100%;
+    height: auto;
+}
+
+.subcaption {
+    font-size: 0.85em;
+    margin-top: 0.5em;
+    font-style: italic;
+}
+
+ul, ol {
+    padding-left: 1.5em;
+}
+
+li {
+    margin-bottom: 0.5em;
+}
+
+.latex-table {
+    margin: 1.5em 0;
+    overflow-x: auto;
+    max-width: 100%;
+    border-radius: 5px;
+    background-color: transparent;
+    padding: 1px;
+}
+
+.longtable-container {
+    max-width: 100%;
+}
+
+.longtable-container table {
+    width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+}
+
+.table-caption {
+    margin-top: 0.75em;
+    text-align: center;
+    font-style: italic;
+    color: #ccc;
+    font-size: 0.9em;
+}
+
+.latex-content {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.hfill-container {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+}
+
+.hfill-container > *:first-child {
+    margin-right: auto;
+}
+
+.hfill-container > *:last-child {
+    margin-left: auto;
+}
+
+table {
+    border-collapse: collapse;
+    margin: 1em 0;
+    width: 100%;
+    background-color: transparent;
+    border-radius: 5px;
+    overflow: hidden;
+    table-layout: auto;
+    border: none;
+}
+
+tr:first-child th {
+    border-top: 2px solid #888;
+    border-bottom: 1px solid #888;
+    font-weight: bold;
+    background-color: rgba(60, 60, 60, 0.5);
+    color: #fff;
+    padding: 10px 8px;
+}
+
+tr:last-child td {
+    border-bottom: 2px solid #888;
+}
+
+.midrule-after td {
+    border-bottom: 1px solid #666;
+}
+
+td, th {
+    border: 1px solid #666;
+    padding: 8px;
+    text-align: left;
+    vertical-align: top;
+}
+
+th {
+    background-color: rgba(60, 60, 60, 0.4);
+    font-weight: bold;
+    text-align: center;
+}
+
+tr:nth-child(even) {
+    background-color: rgba(50, 50, 50, 0.2);
+}
+
+tr:hover {
+    background-color: rgba(70, 70, 70, 0.3);
+}
+
+td, th {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'STIX Two Math', 'Latin Modern Math', serif;
+}
+
+.derivative-symbol {
+    font-family: 'STIX Two Math', 'Latin Modern Math', serif;
+    font-style: normal;
+}
+
+strong {
+    font-weight: bold;
+}
+
+em {
+    font-style: italic;
+}
+
+u {
+    text-decoration: underline;
+}
+
+/* TColorBox styles */
+.tcolorbox {
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+    overflow: hidden;
+}
+
+.tcolorbox:hover {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+.tcolorbox-title {
+    font-size: 1.1em;
+}
+
+.tcolorbox-content {
+    line-height: 1.6;
+}
+
+/* Pour les variantes courantes */
+.tcolorbox.definition {
+    background-color: #f0f8ff;
+    border: 1px solid #b8d0eb;
+}
+
+.tcolorbox.theorem {
+    background-color: #f0fff0;
+    border: 1px solid #c0e8c0;
+}
+
+.tcolorbox.example {
+    background-color: #fffff0;
+    border: 1px solid #e8e0c0;
+}
+
+.tcolorbox.remark {
+    background-color: #fff0f0;
+    border: 1px solid #e8c0c0;
+}

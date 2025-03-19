@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="markdownLatexStyle.css">
+    <link rel="stylesheet" href="highlight_xcodeClassicDarkStyle.css">
+</head>
+<body>
+    <div id="content"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/markdown-it/13.0.1/markdown-it.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.11.1/highlight.min.js"></script>
+    <script>
+        var markdownContent = `[TEXT]`;
+        window.MathJax = {
+            tex: {
+                packages: ['base', 'ams', 'noerrors', 'noundefined', 'boldsymbol', 'color', 'cancel', 'cases', 'tagformat'],
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                processEscapes: true,
+                processEnvironments: true,
+                processRefs: true,
+                digits: /^(?:[0-9]+(?:\{,\}[0-9]{3})*(?:\.[0-9]*)?|\.[0-9]+)/,
+                tags: 'none',
+                maxMacros: 10000,
+                maxBuffer: 15 * 1024,
+                formatError: (jax, err) => {
+                    return jax.formatError(err);
+                },
+                macros: {
+                    'R': '{\\mathbb{R}}',
+                    'N': '{\\mathbb{N}}',
+                    'Z': '{\\mathbb{Z}}',
+                    'Q': '{\\mathbb{Q}}',
+                    'C': '{\\mathbb{C}}',
+                    'label': '\\\\label',
+                    'ref': '\\\\ref',
+                    'eqref': '\\\\eqref',
+                    'cdots': '\\\\cdots',
+                    'frac': '\\\\frac'
+                }
+            },
+            options: {
+                enableMenu: false,
+                renderActions: {
+                    addMenu: [],
+                    checkLoading: []
+                },
+                skipHtmlTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code'],
+                processHtmlClass: 'math',
+                ignoreHtmlClass: 'no-math'
+            },
+            chtml: {
+                scale: 1.2,
+                mtextInheritFont: false,
+                merrorInheritFont: true,
+                adaptiveCSS: true
+            },
+            loader: {
+                load: ['[tex]/ams', '[tex]/boldsymbol', '[tex]/color', '[tex]/cancel', '[tex]/cases', '[tex]/noerrors', '[tex]/noundefined', '[tex]/tagformat']
+            },
+            startup: {
+                ready: () => {
+                    MathJax.startup.defaultReady();
+                    MathJax.startup.promise.then(() => { });
+                },
+                pageReady: function() {
+                    return MathJax.startup.defaultPageReady().then(function() {
+                        setTimeout(updateHeight, 100);
+                    });
+                }
+            }
+        };
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+    <script src="markdownLatexScript.js"></script>
+</body>
+</html>
