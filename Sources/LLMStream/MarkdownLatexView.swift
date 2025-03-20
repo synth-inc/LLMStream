@@ -95,7 +95,6 @@ public struct MarkdownLatexView: NSViewRepresentable {
             const style = document.createElement('style');
             style.textContent = `\(cssContent)`;
             document.head.appendChild(style);
-            window.hasActionCallback = \(onCodeAction != nil);
         """
         let cssScript = WKUserScript(
             source: cssVariables,
@@ -143,6 +142,7 @@ public struct MarkdownLatexView: NSViewRepresentable {
                 style.textContent = `\(cssContent)`;
                 document.head.appendChild(style);
             }
+            window.hasActionCallback = \(onCodeAction != nil);
         """
         webView.evaluateJavaScript(cssVariables)
 
@@ -172,7 +172,7 @@ public struct MarkdownLatexView: NSViewRepresentable {
                 }
             }
             if message.name == "log" {
-                guard let message = message.body as? String else { return }
+                // guard let message = message.body as? String else { return }
                 // print("LLMStream - JS: " + message)
             }
             if message.name == "codeAction" {
