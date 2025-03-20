@@ -105,14 +105,11 @@ public struct MarkdownLatexView: NSViewRepresentable {
 
         context.coordinator.lastContent = content
         loadHTML(in: webView)
-        print("MarkdownLatexView: makeNSView")
         return webView
     }
 
     public func updateNSView(_ webView: WKWebView, context: Self.Context) {
-        print("MarkdownLatexView: updateNSView")
         if context.coordinator.lastContent != content {
-            print("MarkdownLatexView: updateNSView HTML updated")
             context.coordinator.lastContent = content
             loadHTML(in: webView)
         }
@@ -157,7 +154,6 @@ public struct MarkdownLatexView: NSViewRepresentable {
                 
                 let now = Date()
                 if now.timeIntervalSince(lastHeightUpdate) >= minimumUpdateInterval {
-                    print("LLMStream - heightUpdate: \(height)")
                     DispatchQueue.main.async {
                         self.parent.height = CGFloat(height)
                     }
@@ -166,7 +162,7 @@ public struct MarkdownLatexView: NSViewRepresentable {
             }
             if message.name == "log" {
                 guard let message = message.body as? String else { return }
-                print("LLMStream - JS: " + message)
+                // print("LLMStream - JS: " + message)
             }
         }
         
