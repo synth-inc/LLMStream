@@ -13,12 +13,16 @@ LLMStream is a powerful macOS Swift Package that provides a customizable WebView
 
 - 📝 **Markdown Support** - Complete Markdown rendering with inline formatting and nested lists
 - 💻 **Code Highlighting** - Syntax highlighting for multiple programming languages with convenient copy functionality
+
 <p align="center"><img src="images/Code-block.png" width="300"/></p>
+
 - ⚡ **LaTeX Integration** - Seamless rendering of mathematical expressions:
   - Inline expressions using `$...$`
   - Display math using `\[...\]`
   - Partial document rendering
+
 <p align="center"><img src="images/Latex.png" width="300" align/></p>
+
 - 🔄 **Real-time Updates** - Smooth content updates without flickering
 - 🎨 **Customizable Styling** - Flexible appearance configuration
 
