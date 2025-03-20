@@ -51,9 +51,24 @@ pre {
     height: var(--copy-button-size);
     opacity: var(--copy-button-opacity);
     cursor: pointer;
-    background-image: url('copy.svg');
+    background-image: var(--copy-button-icon);
     background-size: contain;
     background-repeat: no-repeat;
+}
+
+.code-title-bar .action-button {
+    display: var(--show-action-button);
+    width: var(--action-button-size);
+    height: var(--action-button-size);
+    opacity: var(--action-button-opacity);
+    cursor: pointer;
+    background-image: var(--action-button-icon);
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.code-title-bar .action-button:hover {
+    opacity: var(--action-button-hover-opacity);
 }
 
 .code-title-bar .copy-button:hover {
@@ -61,6 +76,10 @@ pre {
 }
 
 .code-title-bar .copy-button:active {
+    transform: scale(1.2);
+}
+
+.code-title-bar .action-button:active {
     transform: scale(1.2);
 }
 

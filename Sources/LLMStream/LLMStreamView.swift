@@ -10,6 +10,7 @@ import SwiftUI
 public struct LLMStreamView: View {
     let text: String
     let configuration: LLMStreamConfiguration
+    let onCodeAction: ((String) -> Void)?
     
     // ContentSegment represents either normal text or a thought block
     struct ContentSegment {
@@ -18,9 +19,14 @@ public struct LLMStreamView: View {
         let content: String
     }
     
-    public init(text: String, configuration: LLMStreamConfiguration = .default) {
+    public init(
+        text: String,
+        configuration: LLMStreamConfiguration = .default,
+        onCodeAction: ((String) -> Void)? = nil
+    ) {
         self.text = text
         self.configuration = configuration
+        self.onCodeAction = onCodeAction
     }
     
     // Split the text into segments based on <think> and </think> tags.
@@ -70,7 +76,8 @@ public struct LLMStreamView: View {
                 } else {
                     MarkdownLatexSegmentView(
                         content: segment.content,
-                        configuration: configuration
+                        configuration: configuration,
+                        onCodeAction: onCodeAction
                     )
                 }
             }
@@ -83,6 +90,7 @@ public struct LLMStreamView: View {
 private struct MarkdownLatexSegmentView: View {
     let content: String
     let configuration: LLMStreamConfiguration
+    let onCodeAction: ((String) -> Void)?
     
     @State private var height: CGFloat = 0
     
@@ -90,7 +98,8 @@ private struct MarkdownLatexSegmentView: View {
         MarkdownLatexView(
             content: content,
             height: $height,
-            configuration: configuration
+            configuration: configuration,
+            onCodeAction: onCodeAction
         )
         .textSelection(.enabled)
         .multilineTextAlignment(.leading)

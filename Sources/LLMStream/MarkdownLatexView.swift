@@ -14,6 +14,7 @@ public struct MarkdownLatexView: NSViewRepresentable {
     var content: String
     @Binding var height: CGFloat
     let configuration: LLMStreamConfiguration
+    let onCodeAction: ((String) -> Void)?
     
     private var cssContent: String {
         """
@@ -53,10 +54,17 @@ public struct MarkdownLatexView: NSViewRepresentable {
             /* Code Block Configuration */
             --show-language: \(configuration.codeBlock.showLanguage ? "flex" : "none");
             --show-copy-button: \(configuration.codeBlock.showCopyButton ? "block" : "none");
+            --show-action-button: \(configuration.codeBlock.showActionButton ? "block" : "none");
             --language-text-size: \(configuration.codeBlock.languageTextSize)px;
             --copy-button-size: \(configuration.codeBlock.copyButtonSize)px;
+            --action-button-size: \(configuration.codeBlock.actionButtonSize)px;
             --copy-button-opacity: \(configuration.codeBlock.copyButtonOpacity);
             --copy-button-hover-opacity: \(configuration.codeBlock.copyButtonHoverOpacity);
+            --copy-button-icon: \(configuration.codeBlock.copyButtonIcon?.cssString ?? "url('copy.svg')");
+            --action-button-opacity: \(configuration.codeBlock.actionButtonOpacity);
+            --action-button-hover-opacity: \(configuration.codeBlock.actionButtonHoverOpacity);
+            --action-button-icon: \(configuration.codeBlock.actionButtonIcon?.cssString ?? "none");
+            --action-button-tooltip: "\(configuration.codeBlock.actionButtonTooltip)";
             
             /* Table Configuration */
             --show-caption: \(configuration.table.showCaption ? "block" : "none");
@@ -71,10 +79,11 @@ public struct MarkdownLatexView: NSViewRepresentable {
         """
     }
     
-    public init(content: String, height: Binding<CGFloat>, configuration: LLMStreamConfiguration) {
+    public init(content: String, height: Binding<CGFloat>, configuration: LLMStreamConfiguration, onCodeAction: ((String) -> Void)? = nil) {
         self.content = content
         self._height = height
         self.configuration = configuration
+        self.onCodeAction = onCodeAction
     }
 
     public func makeCoordinator() -> Coordinator {
@@ -86,6 +95,7 @@ public struct MarkdownLatexView: NSViewRepresentable {
             const style = document.createElement('style');
             style.textContent = `\(cssContent)`;
             document.head.appendChild(style);
+            window.hasActionCallback = \(onCodeAction != nil);
         """
         let cssScript = WKUserScript(
             source: cssVariables,
@@ -96,6 +106,7 @@ public struct MarkdownLatexView: NSViewRepresentable {
         let config = WKWebViewConfiguration()
         config.userContentController.add(context.coordinator, name: "heightUpdate")
         config.userContentController.add(context.coordinator, name: "log")
+        config.userContentController.add(context.coordinator, name: "codeAction")
         config.userContentController.addUserScript(cssScript)
         
         let webView = VerticalScrollPassthroughWebView(frame: .zero, configuration: config)
@@ -163,6 +174,12 @@ public struct MarkdownLatexView: NSViewRepresentable {
             if message.name == "log" {
                 guard let message = message.body as? String else { return }
                 // print("LLMStream - JS: " + message)
+            }
+            if message.name == "codeAction" {
+                guard let code = message.body as? String else { return }
+                DispatchQueue.main.async {
+                    self.parent.onCodeAction?(code)
+                }
             }
         }
         

@@ -135,10 +135,37 @@ let layoutConfig = LayoutConfiguration(
 let codeConfig = CodeBlockConfiguration(
     showLanguage: true,           // Show language label
     showCopyButton: true,         // Show copy button
+    showActionButton: true,       // Show action button
     languageTextSize: 13.0,       // Language label size
     copyButtonSize: 16,           // Copy button size
-    copyButtonOpacity: 0.5,       // Normal opacity
-    copyButtonHoverOpacity: 1.0   // Hover opacity
+    actionButtonSize: 16,         // Action button size
+    copyButtonOpacity: 0.5,       // Copy button normal opacity
+    copyButtonHoverOpacity: 1.0,  // Copy button hover opacity
+    actionButtonOpacity: 0.5,     // Action button normal opacity
+    actionButtonHoverOpacity: 1.0,// Action button hover opacity
+    actionButtonIcon: "play.circle", // SF Symbol name for action button
+    actionButtonTooltip: "Execute"   // Action button tooltip
+)
+```
+
+### Using Code Action Callback
+
+You can add a custom action button to code blocks that triggers a callback with the code content:
+
+```swift
+LLMStreamView(
+    text: "Your content here",
+    configuration: LLMStreamConfiguration(
+        codeBlock: CodeBlockConfiguration(
+            showActionButton: true,
+            actionButtonIcon: "play.circle",
+            actionButtonTooltip: "Run this code"
+        )
+    ),
+    onCodeAction: { code in
+        // Handle the code execution here
+        print("Code to execute:", code)
+    }
 )
 ```
 

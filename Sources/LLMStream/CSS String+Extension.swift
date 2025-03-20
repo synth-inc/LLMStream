@@ -48,3 +48,18 @@ extension TextAlignment {
         }
     }
 }
+
+extension Image {
+    
+    @MainActor
+    var cssString: String? {
+        let renderer = ImageRenderer(content: self)
+        
+        guard let nsImage = renderer.nsImage,
+              let tiffData = nsImage.tiffRepresentation,
+              let bitmap = NSBitmapImageRep(data: tiffData),
+              let pngData = bitmap.representation(using: .png, properties: [:]) else { return nil }
+
+        return "url(data:image/png;base64," + pngData.base64EncodedString() + ")"
+    }
+}

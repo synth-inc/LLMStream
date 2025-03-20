@@ -37,7 +37,11 @@ document.addEventListener("DOMContentLoaded", function () {
                 ? hljs.highlight(str, { language }).value
                 : hljs.highlightAuto(str).value;
 
-            return `<div class="code-container"><div class="code-title-bar"><span class="language">${language}</span><div class="copy-button" onclick="window.copyCode(this)"></div></div><div class="code-content"><pre><code class="hljs language-${lang}">${highlighted}</code></pre></div></div>`;
+            const actionButton = window.hasActionCallback 
+                ? `<div class="action-button" onclick="window.executeCode(this)" title="${getComputedStyle(document.documentElement).getPropertyValue('--action-button-tooltip').replace(/"/g, '')}"></div>` 
+                : '';
+
+            return `<div class="code-container"><div class="code-title-bar"><span class="language">${language}</span><div class="code-buttons">${actionButton}<div class="copy-button" onclick="window.copyCode(this)"></div></div></div><div class="code-content"><pre><code class="hljs language-${lang}">${highlighted}</code></pre></div></div>`;
         }
     }).use(markdownLatexPlugin);
 
@@ -600,6 +604,13 @@ document.addEventListener("DOMContentLoaded", function () {
         const code = container.querySelector('code').textContent;
         
         navigator.clipboard.writeText(code);
+    }
+
+    window.executeCode = function(button) {
+        const container = button.closest('.code-container');
+        const code = container.querySelector('code').textContent;
+        
+        window.webkit.messageHandlers.codeAction.postMessage(code);
     }
 
     renderMarkdown();
