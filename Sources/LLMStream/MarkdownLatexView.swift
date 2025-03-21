@@ -213,29 +213,35 @@ private extension MarkdownLatexViewShared {
         webView.evaluateJavaScript("window.hasActionCallback = \(onCodeAction != nil);")
         
         let encodedMarkdown = MarkdownLatexTextProcessor.cleanLatexDocuments(in: content)
-        htmlContent = htmlContent.replacingOccurrences(of: "[TEXT]", with: encodedMarkdown)
+        
+        // Si c'est le premier chargement, on charge la page HTML complète
+        if !webView.isLoading && webView.url == nil {
+            htmlContent = htmlContent.replacingOccurrences(of: "[TEXT]", with: encodedMarkdown)
 
-        let cssVariables = """
-            const styleElement = document.querySelector('style');
-            if (styleElement) {
-                styleElement.textContent = `\(cssContent)`;
-            } else {
-                const style = document.createElement('style');
-                style.textContent = `\(cssContent)`;
-                document.head.appendChild(style);
-            }
-        """
-        
-        // Inject CSS variables
-        let initScript = WKUserScript(
-            source: "window.hasActionCallback = \(onCodeAction != nil);",
-            injectionTime: .atDocumentStart,
-            forMainFrameOnly: true
-        )
-        webView.configuration.userContentController.addUserScript(initScript)
-        
-        webView.evaluateJavaScript(cssVariables)
-        webView.loadHTMLString(htmlContent, baseURL: Bundle.module.resourceURL)
+            let cssVariables = """
+                const styleElement = document.querySelector('style');
+                if (styleElement) {
+                    styleElement.textContent = `\(cssContent)`;
+                } else {
+                    const style = document.createElement('style');
+                    style.textContent = `\(cssContent)`;
+                    document.head.appendChild(style);
+                }
+            """
+            // Inject CSS variables
+            let initScript = WKUserScript(
+                source: "window.hasActionCallback = \(onCodeAction != nil);",
+                injectionTime: .atDocumentStart,
+                forMainFrameOnly: true
+            )
+            webView.configuration.userContentController.addUserScript(initScript)
+            
+            webView.evaluateJavaScript(cssVariables)
+            webView.loadHTMLString(htmlContent, baseURL: Bundle.module.resourceURL)
+        } else {
+            print("\(encodedMarkdown)")
+            webView.evaluateJavaScript("window.markdownContent = `\(encodedMarkdown)`; renderMarkdown();")
+        }
     }
 }
 
