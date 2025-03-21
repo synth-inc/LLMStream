@@ -1,6 +1,6 @@
 # LLMStream
 
-LLMStream is a powerful macOS Swift Package that provides a customizable WebView component for rendering rich text content with advanced features:
+LLMStream is a powerful iOS/macOS Swift Package that provides a customizable WebView component for rendering rich text content with advanced features:
 
 ## ✨ Key Features
 
@@ -35,7 +35,8 @@ LLMStream is a powerful macOS Swift Package that provides a customizable WebView
 
 ## 📋 Requirements
 
-- macOS 12.0 or later
+- iOS 16.0 or later
+- macOS 13.0 or later
 - Swift 5.7+
 - Xcode 14+
 
