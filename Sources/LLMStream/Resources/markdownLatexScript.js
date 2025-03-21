@@ -37,7 +37,9 @@ document.addEventListener("DOMContentLoaded", function () {
                 ? hljs.highlight(str, { language }).value
                 : hljs.highlightAuto(str).value;
 
-            const actionButton = window.hasActionCallback 
+            log("window.hasActionCallback " + window.hasActionCallback);
+            
+            const actionButton = window.hasActionCallback
                 ? `<div class="action-button" onclick="window.executeCode(this)" title="${getComputedStyle(document.documentElement).getPropertyValue('--action-button-tooltip').replace(/"/g, '')}"></div>` 
                 : '';
 

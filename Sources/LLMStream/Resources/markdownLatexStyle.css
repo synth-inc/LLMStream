@@ -45,6 +45,12 @@ pre {
     opacity: 0.6;
 }
 
+.code-title-bar .code-buttons {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
 .code-title-bar .copy-button {
     display: var(--show-copy-button);
     width: var(--copy-button-size);

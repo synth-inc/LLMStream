@@ -5,18 +5,107 @@
 //  Created by Kévin Naudin on 10/03/2025.
 //
 
-import AppKit
 import SwiftUI
 import WebKit
-import os
 
-public struct MarkdownLatexView: NSViewRepresentable {
+#if os(iOS)
+public struct MarkdownLatexViewiOS: UIViewRepresentable, @preconcurrency MarkdownLatexViewShared {
+    typealias ViewContext = Context
     var content: String
-    @Binding var height: CGFloat
+    var height: Binding<CGFloat>
     let configuration: LLMStreamConfiguration
     let onCodeAction: ((String) -> Void)?
     
-    private var cssContent: String {
+    public init(content: String, height: Binding<CGFloat>, configuration: LLMStreamConfiguration, onCodeAction: ((String) -> Void)? = nil) {
+        self.content = content
+        self.height = height
+        self.configuration = configuration
+        self.onCodeAction = onCodeAction
+    }
+
+    public func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    public func makeUIView(context: Context) -> WKWebView {
+        return makeWebView(context: context)
+    }
+
+    public func updateUIView(_ webView: WKWebView, context: Context) {
+        if context.coordinator.lastContent != content {
+            context.coordinator.lastContent = content
+            loadHTML(in: webView)
+        }
+    }
+}
+#else
+public struct MarkdownLatexViewMacOS: NSViewRepresentable, @preconcurrency MarkdownLatexViewShared {
+    typealias ViewContext = Context
+    var content: String
+    var height: Binding<CGFloat>
+    let configuration: LLMStreamConfiguration
+    let onCodeAction: ((String) -> Void)?
+    
+    public init(content: String, height: Binding<CGFloat>, configuration: LLMStreamConfiguration, onCodeAction: ((String) -> Void)? = nil) {
+        self.content = content
+        self.height = height
+        self.configuration = configuration
+        self.onCodeAction = onCodeAction
+    }
+
+    public func makeCoordinator() -> Coordinator {
+        Coordinator(self)
+    }
+
+    public func makeNSView(context: Context) -> WKWebView {
+        return makeWebView(context: context)
+    }
+
+    public func updateNSView(_ webView: WKWebView, context: Context) {
+        if context.coordinator.lastContent != content {
+            context.coordinator.lastContent = content
+            loadHTML(in: webView)
+        }
+    }
+}
+#endif
+
+// Common typealias to provide a unified API
+#if os(iOS)
+public typealias MarkdownLatexView = MarkdownLatexViewiOS
+#else
+public typealias MarkdownLatexView = MarkdownLatexViewMacOS
+#endif
+
+// Protocol to share common functionality
+private protocol MarkdownLatexViewShared {
+    var content: String { get }
+    var height: Binding<CGFloat> { get }
+    var configuration: LLMStreamConfiguration { get }
+    var onCodeAction: ((String) -> Void)? { get }
+    
+    associatedtype ViewContext
+    @MainActor func makeWebView(context: ViewContext) -> WKWebView
+}
+
+#if os(iOS)
+extension MarkdownLatexViewiOS {
+    func makeWebView(context: UIViewRepresentableContext<MarkdownLatexViewiOS>) -> WKWebView {
+        makeSharedWebView(coordinator: context.coordinator)
+    }
+}
+#else
+extension MarkdownLatexViewMacOS {
+    func makeWebView(context: NSViewRepresentableContext<MarkdownLatexViewMacOS>) -> WKWebView {
+        makeSharedWebView(coordinator: context.coordinator)
+    }
+}
+#endif
+
+// Common extension to share code between platforms
+@MainActor
+private extension MarkdownLatexViewShared {
+    var cssContent: String {
         """
         :root {
             /* Font Configuration */
@@ -79,18 +168,8 @@ public struct MarkdownLatexView: NSViewRepresentable {
         """
     }
     
-    public init(content: String, height: Binding<CGFloat>, configuration: LLMStreamConfiguration, onCodeAction: ((String) -> Void)? = nil) {
-        self.content = content
-        self._height = height
-        self.configuration = configuration
-        self.onCodeAction = onCodeAction
-    }
-
-    public func makeCoordinator() -> Coordinator {
-        Coordinator(self)
-    }
-
-    public func makeNSView(context: Self.Context) -> WKWebView {
+    
+    func makeSharedWebView(coordinator: Coordinator) -> WKWebView {
         let cssVariables = """
             const style = document.createElement('style');
             style.textContent = `\(cssContent)`;
@@ -103,33 +182,36 @@ public struct MarkdownLatexView: NSViewRepresentable {
         )
         
         let config = WKWebViewConfiguration()
-        config.userContentController.add(context.coordinator, name: "heightUpdate")
-        config.userContentController.add(context.coordinator, name: "log")
-        config.userContentController.add(context.coordinator, name: "codeAction")
+        config.userContentController.add(coordinator, name: "heightUpdate")
+        config.userContentController.add(coordinator, name: "log")
+        config.userContentController.add(coordinator, name: "codeAction")
         config.userContentController.addUserScript(cssScript)
         
         let webView = VerticalScrollPassthroughWebView(frame: .zero, configuration: config)
-        webView.navigationDelegate = context.coordinator
+        webView.navigationDelegate = coordinator
+        #if os(macOS)
         webView.setValue(false, forKey: "drawsBackground")
         webView.allowsMagnification = false
+        #else
+        webView.isOpaque = false
+        webView.backgroundColor = .clear
+        webView.scrollView.backgroundColor = .clear
+        #endif
 
-        context.coordinator.lastContent = content
+        coordinator.lastContent = content
         loadHTML(in: webView)
         return webView
     }
 
-    public func updateNSView(_ webView: WKWebView, context: Self.Context) {
-        if context.coordinator.lastContent != content {
-            context.coordinator.lastContent = content
-            loadHTML(in: webView)
-        }
-    }
-
-    private func loadHTML(in webView: WKWebView) {
+    func loadHTML(in webView: WKWebView) {
         guard let bundlePath = Bundle.module.path(forResource: "markdownLatex", ofType: "html"),
               var htmlContent = try? String(contentsOfFile: bundlePath, encoding: .utf8) else {
             return
         }
+        
+        // Set hasActionCallback before content is loaded
+        webView.evaluateJavaScript("window.hasActionCallback = \(onCodeAction != nil);")
+        
         let encodedMarkdown = MarkdownLatexTextProcessor.cleanLatexDocuments(in: content)
         htmlContent = htmlContent.replacingOccurrences(of: "[TEXT]", with: encodedMarkdown)
 
@@ -142,51 +224,68 @@ public struct MarkdownLatexView: NSViewRepresentable {
                 style.textContent = `\(cssContent)`;
                 document.head.appendChild(style);
             }
-            window.hasActionCallback = \(onCodeAction != nil);
         """
+        
+        // Inject CSS variables
+        let initScript = WKUserScript(
+            source: "window.hasActionCallback = \(onCodeAction != nil);",
+            injectionTime: .atDocumentStart,
+            forMainFrameOnly: true
+        )
+        webView.configuration.userContentController.addUserScript(initScript)
+        
         webView.evaluateJavaScript(cssVariables)
-
         webView.loadHTMLString(htmlContent, baseURL: Bundle.module.resourceURL)
     }
+}
 
-    public class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate {
-        var parent: MarkdownLatexView
-        var lastContent: String = ""
-        private var lastHeightUpdate: Date = .distantPast
-        private let minimumUpdateInterval: TimeInterval = 0.1
-        
-        init(_ parent: MarkdownLatexView) {
-            self.parent = parent
-        }
-        
-        public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-            if message.name == "heightUpdate" {
-                guard let height = message.body as? Double else { return }
-                
-                let now = Date()
-                if now.timeIntervalSince(lastHeightUpdate) >= minimumUpdateInterval {
-                    DispatchQueue.main.async {
-                        self.parent.height = CGFloat(height)
-                    }
-                    lastHeightUpdate = now
-                }
-            }
-            if message.name == "log" {
-                // guard let message = message.body as? String else { return }
-                // print("LLMStream - JS: " + message)
-            }
-            if message.name == "codeAction" {
-                guard let code = message.body as? String else { return }
+// Common Coordinator class
+public class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate {
+    #if os(iOS)
+    var parent: MarkdownLatexViewiOS
+    
+    init(_ parent: MarkdownLatexViewiOS) {
+        self.parent = parent
+    }
+    #else
+    var parent: MarkdownLatexViewMacOS
+    
+    init(_ parent: MarkdownLatexViewMacOS) {
+        self.parent = parent
+    }
+    #endif
+    
+    var lastContent: String = ""
+    private var lastHeightUpdate: Date = .distantPast
+    private let minimumUpdateInterval: TimeInterval = 0.1
+    
+    public func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        if message.name == "heightUpdate" {
+            guard let height = message.body as? Double else { return }
+            
+            let now = Date()
+            if now.timeIntervalSince(lastHeightUpdate) >= minimumUpdateInterval {
                 DispatchQueue.main.async {
-                    self.parent.onCodeAction?(code)
+                    self.parent.height.wrappedValue = CGFloat(height)
                 }
+                lastHeightUpdate = now
             }
         }
-        
-        public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                webView.evaluateJavaScript("updateHeight();")
+        if message.name == "log" {
+             guard let message = message.body as? String else { return }
+             print("LLMStream - JS: " + message)
+        }
+        if message.name == "codeAction" {
+            guard let code = message.body as? String else { return }
+            DispatchQueue.main.async {
+                self.parent.onCodeAction?(code)
             }
+        }
+    }
+    
+    public func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            webView.evaluateJavaScript("updateHeight();")
         }
     }
 }

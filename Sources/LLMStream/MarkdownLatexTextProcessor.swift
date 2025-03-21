@@ -5,7 +5,7 @@
 //  Created by Kévin Naudin on 17/03/2025.
 //
 
-import AppKit
+import Foundation
 
 struct MarkdownLatexTextProcessor {
     

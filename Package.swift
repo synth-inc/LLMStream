@@ -6,7 +6,8 @@ import PackageDescription
 let package = Package(
     name: "LLMStream",
     platforms: [
-        .macOS(.v13)
+        .macOS(.v13),
+        .iOS(.v16)
     ],
     products: [
         .library(

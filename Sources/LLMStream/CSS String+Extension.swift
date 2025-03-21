@@ -55,10 +55,15 @@ extension Image {
     var cssString: String? {
         let renderer = ImageRenderer(content: self)
         
+        #if os(macOS)
         guard let nsImage = renderer.nsImage,
               let tiffData = nsImage.tiffRepresentation,
               let bitmap = NSBitmapImageRep(data: tiffData),
               let pngData = bitmap.representation(using: .png, properties: [:]) else { return nil }
+        #else
+        guard let uiImage = renderer.uiImage,
+              let pngData = uiImage.pngData() else { return nil }
+        #endif
 
         return "url(data:image/png;base64," + pngData.base64EncodedString() + ")"
     }

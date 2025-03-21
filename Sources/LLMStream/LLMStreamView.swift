@@ -107,18 +107,3 @@ private struct MarkdownLatexSegmentView: View {
         .frame(height: height)
     }
 }
-
-#Preview {
-    let font = FontConfiguration()
-    let color = ColorConfiguration()
-    let layout = LayoutConfiguration()
-    let thought = ThoughtConfiguration()
-    
-    let config = LLMStreamConfiguration(font: font,
-                                        colors: color,
-                                        layout: layout,
-                                        thought: thought)
-    
-    LLMStreamView(text: "",
-                  configuration: config)
-}
