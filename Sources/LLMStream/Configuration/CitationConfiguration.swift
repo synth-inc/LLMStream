@@ -2,7 +2,7 @@
 //  CitationConfiguration.swift
 //  LLMStream
 //
-//  Created by Kévin Naudin on 20/03/2025.
+//  Created by Kévin Naudin on 24/03/2025.
 //
 
 import SwiftUI

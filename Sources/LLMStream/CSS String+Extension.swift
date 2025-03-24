@@ -9,7 +9,13 @@ import SwiftUI
 
 extension Color {
     var cssString: String {
-        let components = self.cgColor?.components ?? []
+        #if os(macOS)
+        let color = NSColor(self)
+        #else
+        let color = UIColor(self)
+        #endif
+        let components = color.cgColor.components ?? []
+
         if components.count >= 3 {
             let red = Int(components[0] * 255)
             let green = Int(components[1] * 255)
