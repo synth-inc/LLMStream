@@ -164,6 +164,17 @@ mjx-container[display="true"] {
     border-radius: var(--theorem-corner-radius);
 }
 
+.latex-generating {
+    display: flex;
+    align-items: left;
+    justify-content: left;
+}
+
+.latex-generating span {
+    color: #495057;
+    font-size: 14px;
+}
+
 .latex-figure {
     margin: 2em auto;
     text-align: center;

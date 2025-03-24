@@ -1,4 +1,3 @@
-// Variables et fonctions globales
 window.markdownContent = window.markdownContent || "";
 window.lastProcessedContent = window.lastProcessedContent || "";
 let md;
@@ -25,37 +24,27 @@ function findLastCommonNewline(oldStr, newStr) {
         i++;
     }
     
-    // Si on n'a pas trouvé de saut de ligne mais qu'on a du contenu commun,
-    // utiliser le dernier caractère commun
     if (lastNewlineIndex === -1 && lastCommonIndex !== -1) {
-        log("No newline found, using last common character at: " + lastCommonIndex);
         return lastCommonIndex;
     }
     
-    log("Last common newline index: " + lastNewlineIndex);
-    if (lastNewlineIndex !== -1) {
-        log("Common content until newline: " + oldStr.substring(0, lastNewlineIndex));
-        log("New content after newline: " + newStr.substring(lastNewlineIndex + 1));
-    }
     return lastNewlineIndex;
 }
 
 function renderMarkdown() {
     if (!md) {
-        log("Markdown-it not loaded - skipping rendering");
-        return; // Protection si markdown-it n'est pas encore chargé
+        return;
     }
     
     let content = document.getElementById("content");
     
-    log("Current content length: " + window.markdownContent.length);
-    log("Last processed content length: " + (window.lastProcessedContent ? window.lastProcessedContent.length : 0));
-    log("Current content: " + window.markdownContent);
-    log("Last processed content: " + window.lastProcessedContent);
+//    log("Current content length: " + window.markdownContent.length);
+//    log("Last processed content length: " + (window.lastProcessedContent ? window.lastProcessedContent.length : 0));
+//    log("Current content: " + window.markdownContent);
+//    log("Last processed content: " + window.lastProcessedContent);
     
     // Si c'est le premier rendu, traiter tout le contenu
     if (!window.lastProcessedContent) {
-        log("First render - processing entire content");
         let html = md.render(window.markdownContent);
         html = fixMathDelimiters(html);
         html = convertLatexToHTML(html);
@@ -82,6 +71,7 @@ function renderMarkdown() {
     let currentBlockType = null;
     let hasIncompleteLatexBlock = false;
     let hasIncompleteMathBlock = false;
+    let latexBlocks = [];
     
     const lines = window.markdownContent.split('\n');
     for (let i = 0; i < lines.length; i++) {
@@ -93,17 +83,32 @@ function renderMarkdown() {
                 insideCodeBlock = true;
                 currentBlockType = blockStart[1].toLowerCase();
                 
-                // Vérifier si c'est un bloc LaTeX
                 if (currentBlockType === 'tex' || currentBlockType === 'latex') {
-                    // Chercher la fin du bloc
                     let foundEnd = false;
+                    let endLine = i;
                     for (let j = i + 1; j < lines.length; j++) {
                         if (lines[j].trim() === '```') {
                             foundEnd = true;
+                            endLine = j;
                             break;
                         }
                     }
-                    hasIncompleteLatexBlock = !foundEnd;
+                    
+                    const blockContent = lines.slice(i + 1, foundEnd ? endLine : undefined).join('\n');
+                    const blockId = `latex-block-${i}`;
+                    
+                    const existingBlock = latexBlocks.find(b => b.content === blockContent);
+                    if (!existingBlock) {
+                        latexBlocks.push({
+                            id: blockId,
+                            start: i,
+                            end: foundEnd ? endLine : undefined,
+                            content: blockContent,
+                            isComplete: foundEnd
+                        });
+                    }
+                    
+                    hasIncompleteLatexBlock = latexBlocks.some(b => !b.isComplete);
                 }
             } else {
                 insideCodeBlock = false;
@@ -112,92 +117,106 @@ function renderMarkdown() {
             continue;
         }
 
-        // Ne compter les délimiteurs que si nous ne sommes pas dans un bloc de code
         if (!insideCodeBlock) {
-            // Compter les délimiteurs inline et display
             for (const type of ['inline', 'display']) {
                 for (const delimiter of mathDelimiters[type]) {
-                    // Créer un pattern qui capture une séquence complète
                     const pattern = new RegExp(delimiter.start + '.*?' + delimiter.end, 'g');
                     const matches = line.match(pattern) || [];
-                    delimiter.count += matches.length * 2; // Multiplier par 2 car chaque match contient début et fin
+                    delimiter.count += matches.length * 2;
                     
-                    // Compter les délimiteurs isolés
                     const startPattern = new RegExp(delimiter.start, 'g');
                     const endPattern = new RegExp(delimiter.end, 'g');
                     const startMatches = (line.match(startPattern) || []).length;
                     const endMatches = (line.match(endPattern) || []).length;
                     
-                    // Soustraire les délimiteurs déjà comptés dans les séquences complètes
                     delimiter.count += (startMatches + endMatches) - (matches.length * 2);
                 }
             }
         }
     }
     
-    // Vérifier si nous avons des blocs mathématiques incomplets
     hasIncompleteMathBlock = mathDelimiters.inline.some(d => d.count % 2 !== 0) || 
                             mathDelimiters.display.some(d => d.count % 2 !== 0);
 
-    log("Has incomplete LaTeX block: " + hasIncompleteLatexBlock);
-    log("Has incomplete math block: " + hasIncompleteMathBlock);
-    log("Math delimiters status: " + JSON.stringify(mathDelimiters));
+//    log("Has incomplete LaTeX block: " + hasIncompleteLatexBlock);
+//    log("Has incomplete math block: " + hasIncompleteMathBlock);
+//    log("Math delimiters status: " + JSON.stringify(mathDelimiters));
 
-    // Si nous sommes au milieu d'un bloc mathématique ou LaTeX, attendre la fin
     if (hasIncompleteLatexBlock || hasIncompleteMathBlock) {
-        log("Waiting for math or LaTeX block to complete");
+        if (latexBlocks.length > 0) {
+            let modifiedLines = lines.slice();
+            
+            for (const block of latexBlocks) {
+                if (!block.isComplete) {
+                    modifiedLines[block.start] = `<div class="latex-generating" id="${block.id}"><span>Generating LaTeX...</span></div>`;
+                    
+                    if (block.start + 1 < modifiedLines.length) {
+                        modifiedLines.fill('', block.start + 1, block.end || modifiedLines.length);
+                    }
+                } else {
+                    modifiedLines[block.start] = '```' + currentBlockType;
+                    const contentLines = block.content.split('\n');
+                    for (let i = 0; i < contentLines.length; i++) {
+                        modifiedLines[block.start + 1 + i] = contentLines[i];
+                    }
+                    modifiedLines[block.end] = '```';
+                }
+            }
+            
+            let html = md.render(modifiedLines.join('\n'));
+            html = fixMathDelimiters(html);
+            html = convertLatexToHTML(html);
+            content.innerHTML = html;
+            
+            renderLatex();
+            return;
+        }
         return;
     }
 
-    // Si le contenu n'a pas changé, ne rien faire
     if (window.lastProcessedContent === window.markdownContent) {
-        log("Content unchanged - no processing needed");
         return;
     }
 
-    // Si aucun bloc mathématique n'est présent et que nous ne sommes pas au premier rendu,
-    // traiter immédiatement le contenu
     if (!hasIncompleteMathBlock && !hasIncompleteLatexBlock && window.lastProcessedContent) {
+        let html = md.render(window.markdownContent);
+        html = fixMathDelimiters(html);
+        html = convertLatexToHTML(html);
         
-        // Vérifier si le contenu a réellement changé
-        if (content.innerHTML === md.render(window.markdownContent)) {
-            log("Content already rendered correctly");
+        if (content.innerHTML === html) {
             window.lastProcessedContent = window.markdownContent;
             return;
         }
         
-        // Trouver la dernière ligne commune
         const lastCommonNewline = findLastCommonNewline(window.lastProcessedContent, window.markdownContent);
         
         if (lastCommonNewline !== -1) {
-            // Ne retraiter que la partie modifiée
             const commonContent = window.markdownContent.substring(0, lastCommonNewline);
             const newContent = window.markdownContent.substring(lastCommonNewline);
             
-            log("Reprocessing only modified content after: " + lastCommonNewline);
-            
             let html = md.render(commonContent + newContent);
+            html = fixMathDelimiters(html);
+            html = convertLatexToHTML(html);
             
             if (content.innerHTML !== html) {
                 content.innerHTML = html;
-                log("Content updated");
             }
         } else {
-            // Si pas de point commun trouvé, retraiter tout
             let html = md.render(window.markdownContent);
+            
+            html = fixMathDelimiters(html);
+            html = convertLatexToHTML(html);
+            
             if (content.innerHTML !== html) {
                 content.innerHTML = html;
-                log("Content fully updated");
             }
         }
         
-        // Mettre à jour le dernier contenu traité
         window.lastProcessedContent = window.markdownContent;
         renderLatex();
         return;
     }
 
-    // Trouver le dernier délimiteur complet (code ou math)
     let lastCodeEnd = window.lastProcessedContent.lastIndexOf("```");
     let lastMathEnd = window.lastProcessedContent.lastIndexOf("$$");
     let lastDisplayMathEnd = window.lastProcessedContent.lastIndexOf("\\]");
@@ -214,12 +233,11 @@ function renderMarkdown() {
         window.markdownContent.lastIndexOf("\\)")
     );
 
-    // Si un des blocs a changé, retraiter depuis le début du dernier bloc
     if (lastCodeEnd !== currentCodeEnd || 
         lastMathEnd !== currentMathEnd || 
         lastDisplayMathEnd !== currentDisplayMathEnd || 
         lastInlineMathEnd !== currentInlineMathEnd) {
-        // Trouver le début du dernier bloc modifié
+        
         let lastBlockStart = Math.max(
             window.markdownContent.lastIndexOf("```", currentCodeEnd - 1),
             window.markdownContent.lastIndexOf("$$", currentMathEnd - 1),
@@ -229,34 +247,31 @@ function renderMarkdown() {
         );
 
         if (lastBlockStart === -1) {
-            log("No complete block found - rerendering everything");
             let html = md.render(window.markdownContent);
+            
             html = fixMathDelimiters(html);
             html = convertLatexToHTML(html);
             content.innerHTML = html;
             window.lastProcessedContent = window.markdownContent;
             renderLatex();
+            
             return;
         }
 
-        // Garder le contenu jusqu'au dernier bloc complet
         let commonContent = window.markdownContent.substring(0, lastBlockStart);
         let newContent = window.markdownContent.substring(lastBlockStart);
-
-        log("New block content to render: " + newContent);
 
         let html = md.render(newContent);
         html = fixMathDelimiters(html);
         html = convertLatexToHTML(html);
 
-        // Mettre à jour le contenu
         content.innerHTML = md.render(commonContent) + html;
         window.lastProcessedContent = window.markdownContent;
         renderLatex();
+            
         return;
     }
 
-    // Si nous arrivons ici, pas de changement nécessaire
     window.lastProcessedContent = window.markdownContent;
 }
 
@@ -268,7 +283,6 @@ function renderLatex() {
     }
 }
 
-// Initialisation au chargement du DOM
 document.addEventListener("DOMContentLoaded", function () {
     function markdownLatexPlugin(md) {
         const defaultFence = md.renderer.rules.fence || function(tokens, idx, options, env, self) {
@@ -278,15 +292,112 @@ document.addEventListener("DOMContentLoaded", function () {
         md.renderer.rules.fence = function(tokens, idx, options, env, self) {
             const token = tokens[idx];
             
-            if (token.info.trim() === "latex" || token.info.trim() === "") {
+            if (token.info.trim() === "latex" || token.info.trim() === "tex" || token.info.trim() === "") {
+                if (env.insideOrderedList && env.currentListItem) {
+                    env.currentListItem.hasLatexBlock = true;
+                }
+                
                 return `<div class="latex-block tex2jax_ignore">${token.content.trim()}</div>\n`;
             }
             
             if (token.info.trim() !== "") {
+                if (env.insideOrderedList && env.currentListItem) {
+                    env.currentListItem.hasCodeBlock = true;
+                }
+                
                 return defaultFence(tokens, idx, options, env, self).replace('<pre>', '<pre class="tex2jax_ignore">');
             }
             
             return defaultFence(tokens, idx, options, env, self);
+        };
+        
+        const originalOrderedListOpen = md.renderer.rules.ordered_list_open || function(tokens, idx, options, env, self) {
+            return self.renderToken(tokens, idx, options);
+        };
+        
+        md.renderer.rules.ordered_list_open = function(tokens, idx, options, env, self) {
+            env.insideOrderedList = true;
+            env.listItems = env.listItems || [];
+            return originalOrderedListOpen(tokens, idx, options, env, self);
+        };
+        
+        const originalOrderedListClose = md.renderer.rules.ordered_list_close || function(tokens, idx, options, env, self) {
+            return self.renderToken(tokens, idx, options);
+        };
+        
+        md.renderer.rules.ordered_list_close = function(tokens, idx, options, env, self) {
+            env.insideOrderedList = false;
+            env.listItems = [];
+            
+            return originalOrderedListClose(tokens, idx, options, env, self);
+        };
+        
+        const originalListItemOpen = md.renderer.rules.list_item_open || function(tokens, idx, options, env, self) {
+            return self.renderToken(tokens, idx, options);
+        };
+        
+        md.renderer.rules.list_item_open = function(tokens, idx, options, env, self) {
+            const token = tokens[idx];
+            
+            env.currentListItem = {
+                hasLatexBlock: false,
+                hasCodeBlock: false,
+                content: []
+            };
+            
+            if (env.insideOrderedList) {
+                env.listItems = env.listItems || [];
+                env.listItems.push(env.currentListItem);
+            }
+            
+            return originalListItemOpen(tokens, idx, options, env, self);
+        };
+        
+        const originalListItemClose = md.renderer.rules.list_item_close || function(tokens, idx, options, env, self) {
+            return self.renderToken(tokens, idx, options);
+        };
+        
+        md.renderer.rules.list_item_close = function(tokens, idx, options, env, self) {
+            env.currentListItem = null;
+            
+            return originalListItemClose(tokens, idx, options, env, self);
+        };
+        
+        const originalRender = md.renderer.render;
+        md.renderer.render = function(tokens, options, env) {
+            let inOrderedList = false;
+            let listItemsWithBlocks = [];
+            let currentListItem = null;
+            
+            for (let i = 0; i < tokens.length; i++) {
+                const token = tokens[i];
+                
+                if (token.type === 'ordered_list_open') {
+                    inOrderedList = true;
+                    listItemsWithBlocks = [];
+                } else if (token.type === 'ordered_list_close') {
+                    inOrderedList = false;
+                } else if (token.type === 'list_item_open' && inOrderedList) {
+                    currentListItem = { hasBlock: false };
+                } else if (token.type === 'list_item_close' && inOrderedList) {
+                    if (currentListItem && currentListItem.hasBlock) {
+                        listItemsWithBlocks.push(currentListItem);
+                    }
+                    currentListItem = null;
+                } else if (token.type === 'fence' && inOrderedList && currentListItem) {
+                    if (token.info === 'latex' || token.info === 'tex' || token.info.trim() !== '') {
+                        currentListItem.hasBlock = true;
+                    }
+                }
+            }
+            
+            let result = originalRender.call(this, tokens, options, env);
+            
+            if (result.includes('<ol start=')) {
+                result = fixOrderedListsInHTML(result);
+            }
+            
+            return result;
         };
     }
     
@@ -304,13 +415,15 @@ document.addEventListener("DOMContentLoaded", function () {
                 : '';
 
             return `<div class="code-container"><div class="code-title-bar"><span class="language">${language}</span><div class="code-buttons">${actionButton}<div class="copy-button" onclick="window.copyCode(this)"></div></div></div><div class="code-content"><pre><code class="hljs language-${lang}">${highlighted}</code></pre></div></div>`;
-        }
+        },
+        breaks: false,
+        typographer: true,
+        listIndent: 1,
+        maxNesting: 100
     }).use(markdownLatexPlugin);
 
-    // Premier rendu au chargement
     renderMarkdown();
     
-    // Observer les changements
     const observer = new MutationObserver(function(mutations) {
         setTimeout(updateHeight, 200);
     });
@@ -329,6 +442,11 @@ window.addEventListener("load", function() {
 });
 
 function fixMathDelimiters(html) {
+
+    html = html.replace(/<p>\s*\\*\[\s*(.*?)\s*\\*\]\s*<\/p>/gi, (match, content) => {
+        return `<p>\\[${content}\\]</p>`;
+    });
+    
     html = html.replace(/<p>\s*\[(.*?\\begin\{cases\}[\s\S]*?\\end\{cases\}.*?)\]\s*<\/p>/gi, (match, content) => {
         return `<p>\\[${content}\\]</p>`;
     });
@@ -806,22 +924,18 @@ function convertLatexToHTML(text) {
 
     text = text.replace(/([^\n<>]+)\\hfill([^\n<>]+)/g, '<div class="hfill-container"><span>$1</span><span>$2</span></div>');
     
-    // Traitement des tcolorbox - Ajouter support pour l'environnement tcolorbox
     text = text.replace(/\\begin\{tcolorbox\}(\[[\s\S]*?\])?([\s\S]*?)\\end\{tcolorbox\}/gs, (match, options, content) => {
-        // Extraire les options éventuelles
         let title = '';
-        let boxColor = '#e6f3ff'; // Couleur par défaut
-        let titleColor = '#4a86e8'; // Couleur par défaut du titre
-        let borderColor = '#2c5fb2'; // Couleur par défaut de la bordure
+        let boxColor = '#e6f3ff';
+        let titleColor = '#4a86e8';
+        let borderColor = '#2c5fb2';
         
         if (options) {
-            // Extraire le titre s'il est spécifié
             const titleMatch = options.match(/title\s*=\s*(?:{([^}]*)}|([^,\]]+))/);
             if (titleMatch) {
                 title = titleMatch[1] || titleMatch[2];
             }
             
-            // Extraire la couleur si spécifiée
             const colorMatch = options.match(/colback\s*=\s*([^,\]]+)/);
             if (colorMatch) {
                 boxColor = colorMatch[1].trim();
@@ -838,10 +952,8 @@ function convertLatexToHTML(text) {
             }
         }
         
-        // Traiter le contenu de la tcolorbox
         content = content.trim();
         
-        // Créer la structure HTML représentant la tcolorbox
         let tcolorboxHTML = '<div class="tcolorbox" style="background-color: ' + boxColor + '; border: 1px solid ' + borderColor + '; border-radius: 5px; padding: 15px; margin: 10px 0;">';
         
         if (title) {
@@ -854,6 +966,8 @@ function convertLatexToHTML(text) {
         return tcolorboxHTML;
     });
 
+    text = fixOrderedLists(text);
+    
     return text;
 }
 
@@ -873,4 +987,166 @@ window.executeCode = function(button) {
     const code = container.querySelector('code').textContent;
     
     window.webkit.messageHandlers.codeAction.postMessage(code);
+}
+
+function fixOrderedLists(html) {
+    const listPattern = /<ol>\s*<li>(.*?)<\/li>\s*<\/ol>\s*(<div class="(?:latex-block|code-container)[\s\S]*?<\/div>)\s*<ol start="(\d+)">/g;
+    
+    let segments = [];
+    let match;
+    while ((match = listPattern.exec(html)) !== null) {
+        segments.push({
+            fullMatch: match[0],
+            listItem: match[1],
+            block: match[2],
+            nextNumber: parseInt(match[3])
+        });
+    }
+    
+    if (segments.length > 0) {
+        let listItems = [];
+        let lastPos = 0;
+        
+        const completePattern = /<ol(?:\s+start="(\d+)")?>(?:\s*<li>(.*?)<\/li>\s*)<\/ol>(?:\s*(<div class="(?:latex-block|code-container)[\s\S]*?<\/div>))?/g;
+        
+        completePattern.lastIndex = 0;
+        
+        while ((match = completePattern.exec(html)) !== null) {
+            const startNum = match[1] ? parseInt(match[1]) : listItems.length + 1;
+            const content = match[2];
+            const block = match[3] || '';
+            
+            listItems.push({
+                number: startNum,
+                content: content,
+                block: block
+            });
+            
+            lastPos = completePattern.lastIndex;
+        }
+        
+        if (listItems.length > 0) {
+            let newList = '<ol class="continuous-numbered-list">\n';
+            
+            listItems.forEach((item, index) => {
+                newList += `  <li value="${item.number}">${item.content}`;
+                
+                if (item.block) {
+                    newList += `\n    ${item.block}\n  `;
+                }
+                
+                newList += '</li>\n';
+            });
+            
+            newList += '</ol>';
+            
+            const firstOlIndex = html.indexOf('<ol');
+            const lastOlCloseIndex = html.lastIndexOf('</ol>') + 5;
+            
+            if (firstOlIndex !== -1 && lastOlCloseIndex !== -1 && lastOlCloseIndex > firstOlIndex) {
+                const beforeLists = html.substring(0, firstOlIndex);
+                const afterLists = html.substring(lastOlCloseIndex);
+                
+                html = beforeLists + newList + afterLists;
+            }
+        }
+    } else {
+        html = html.replace(/<ol start="(\d+)">/g, (match, startVal) => {
+            return `<ol>`;
+        });
+        
+        html = html.replace(/<ol>([\s\S]*?)<\/ol>/g, (match, content) => {
+            const items = content.match(/<li[^>]*>/g) || [];
+            
+            if (items.length > 0) {
+                let counter = 1;
+                let newContent = content.replace(/<li[^>]*>([\s\S]*?)(?=<li|$)/g, (match, itemContent) => {
+                    return `<li value="${counter++}">${itemContent}`;
+                });
+                
+                return `<ol class="fixed-numbered-list">${newContent}</ol>`;
+            }
+            
+            return match;
+        });
+    }
+    
+    return html;
+}
+
+function fixOrderedListsInHTML(html) {
+    const listWithBlockPattern = /(<ol[^>]*>[\s\S]*?<\/ol>)([\s\S]*?)(?=<ol|$)/g;
+    
+    let parts = [];
+    let match;
+    let lastIndex = 0;
+    
+    while ((match = listWithBlockPattern.exec(html)) !== null) {
+        const listHTML = match[1];
+        const afterHTML = match[2];
+        
+        const startMatch = listHTML.match(/<ol\s+start="(\d+)"/);
+        const startNum = startMatch ? parseInt(startMatch[1]) : 1;
+        
+        parts.push({
+            type: 'list',
+            html: listHTML,
+            startNum: startNum,
+            items: extractListItems(listHTML)
+        });
+        
+        if (afterHTML.trim()) {
+            parts.push({
+                type: 'content',
+                html: afterHTML
+            });
+        }
+        
+        lastIndex = match.index + match[0].length;
+    }
+    
+    if (parts.length > 0) {
+        let allItems = [];
+        let currentNum = 1;
+        
+        parts.forEach(part => {
+            if (part.type === 'list') {
+                part.items.forEach(item => {
+                    allItems.push({
+                        content: item,
+                        number: currentNum++,
+                        afterHTML: ''
+                    });
+                });
+            } else if (part.type === 'content' && allItems.length > 0) {
+                allItems[allItems.length - 1].afterHTML += part.html;
+            }
+        });
+        
+        if (allItems.length > 0) {
+            let newHTML = '<ol class="continuous-list">\n';
+            
+            allItems.forEach(item => {
+                newHTML += `  <li value="${item.number}">${item.content}${item.afterHTML}</li>\n`;
+            });
+            
+            newHTML += '</ol>';
+            
+            return newHTML;
+        }
+    }
+    
+    return html;
+}
+
+function extractListItems(listHTML) {
+    const itemPattern = /<li[^>]*>([\s\S]*?)<\/li>/g;
+    let items = [];
+    let match;
+    
+    while ((match = itemPattern.exec(listHTML)) !== null) {
+        items.push(match[1]);
+    }
+    
+    return items;
 }
