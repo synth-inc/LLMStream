@@ -60,12 +60,15 @@ extension Image {
     @MainActor
     var cssString: String? {
         let renderer = ImageRenderer(content: self)
+        renderer.scale = 2.0
         
         #if os(macOS)
         guard let nsImage = renderer.nsImage,
               let tiffData = nsImage.tiffRepresentation,
               let bitmap = NSBitmapImageRep(data: tiffData),
-              let pngData = bitmap.representation(using: .png, properties: [:]) else { return nil }
+              let pngData = bitmap.representation(using: .png, properties: [.compressionFactor: 1.0]) else {
+            return nil
+        }
         #else
         guard let uiImage = renderer.uiImage,
               let pngData = uiImage.pngData() else { return nil }
