@@ -12,6 +12,17 @@ function log(message) {
     window.webkit.messageHandlers.log.postMessage(message);
 }
 
+window.addEventListener('click', function(e) {
+    if (e.target.classList.contains('citation')) {
+        e.preventDefault();
+        const url = e.target.getAttribute('data-url');
+        
+        if (url && window.webkit && window.webkit.messageHandlers.urlClicked) {
+            window.webkit.messageHandlers.urlClicked.postMessage(url);
+        }
+    }
+});
+
 function findLastCommonNewline(oldStr, newStr) {
     let i = 0;
     let lastCommonIndex = -1;
@@ -547,6 +558,16 @@ function convertLatexToHTML(text) {
         
         return currentContent;
     }
+    
+    // Nouvelle fonction pour traiter les citations
+    function processCitations(content) {
+        return content.replace(/\[CITATION,\s*(\d+),\s*([^\]]+)\]/g, (match, index, url) => {
+            return `<span class="citation" data-url="${url}" data-index="${index}" title="${url}">${index}</span>`;
+        });
+    }
+    
+    // Appliquer le traitement des citations
+    text = processCitations(text);
     
     // Replace sections
     text = text.replace(/\\section\*?\{(.*?)\}/g, "<h2>$1</h2>");

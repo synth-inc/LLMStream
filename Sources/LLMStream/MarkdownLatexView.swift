@@ -14,12 +14,20 @@ public struct MarkdownLatexViewiOS: UIViewRepresentable, @preconcurrency Markdow
     var content: String
     var height: Binding<CGFloat>
     let configuration: LLMStreamConfiguration
+    let onUrlClicked: ((String) -> Void)
     let onCodeAction: ((String) -> Void)?
     
-    public init(content: String, height: Binding<CGFloat>, configuration: LLMStreamConfiguration, onCodeAction: ((String) -> Void)? = nil) {
+    public init(
+        content: String,
+        height: Binding<CGFloat>,
+        configuration: LLMStreamConfiguration,
+        onUrlClicked: @escaping ((String) -> Void),
+        onCodeAction: ((String) -> Void)? = nil
+    ) {
         self.content = content
         self.height = height
         self.configuration = configuration
+        self.onUrlClicked = onUrlClicked
         self.onCodeAction = onCodeAction
     }
 
@@ -44,12 +52,20 @@ public struct MarkdownLatexViewMacOS: NSViewRepresentable, @preconcurrency Markd
     var content: String
     var height: Binding<CGFloat>
     let configuration: LLMStreamConfiguration
+    let onUrlClicked: ((String) -> Void)
     let onCodeAction: ((String) -> Void)?
     
-    public init(content: String, height: Binding<CGFloat>, configuration: LLMStreamConfiguration, onCodeAction: ((String) -> Void)? = nil) {
+    public init(
+        content: String,
+        height: Binding<CGFloat>,
+        configuration: LLMStreamConfiguration,
+        onUrlClicked: @escaping ((String) -> Void),
+        onCodeAction: ((String) -> Void)? = nil
+    ) {
         self.content = content
         self.height = height
         self.configuration = configuration
+        self.onUrlClicked = onUrlClicked
         self.onCodeAction = onCodeAction
     }
 
@@ -82,6 +98,7 @@ private protocol MarkdownLatexViewShared {
     var content: String { get }
     var height: Binding<CGFloat> { get }
     var configuration: LLMStreamConfiguration { get }
+    var onUrlClicked: ((String) -> Void) { get }
     var onCodeAction: ((String) -> Void)? { get }
     
     associatedtype ViewContext
@@ -129,6 +146,15 @@ private extension MarkdownLatexViewShared {
             --table-row-hover-color: \(configuration.colors.tableRowHoverColor.cssString);
             --theorem-border-color: \(configuration.colors.theoremBorderColor.cssString);
             --proof-border-color: \(configuration.colors.proofBorderColor.cssString);
+            
+            /* Citation Configuration */
+            --citation-background-color: \(configuration.citation.backgroundColor.cssString);
+            --citation-hover-background-color: \(configuration.citation.hoverBackgroundColor.cssString);
+            --citation-text-color: \(configuration.citation.textColor.cssString);
+            --citation-hover-text-color: \(configuration.citation.hoverTextColor.cssString);
+            --citation-border-radius: \(configuration.citation.borderRadius)px;
+            --citation-padding: \(configuration.citation.padding.top)px \(configuration.citation.padding.trailing)px \(configuration.citation.padding.bottom)px \(configuration.citation.padding.leading)px;
+            --citation-margin: \(configuration.citation.margin.top)px \(configuration.citation.margin.trailing)px \(configuration.citation.margin.bottom)px \(configuration.citation.margin.leading)px;
             
             /* Layout Configuration */
             --content-padding: \(configuration.layout.contentPadding.top)px \(configuration.layout.contentPadding.trailing)px \(configuration.layout.contentPadding.bottom)px \(configuration.layout.contentPadding.leading)px;
@@ -184,6 +210,7 @@ private extension MarkdownLatexViewShared {
         let config = WKWebViewConfiguration()
         config.userContentController.add(coordinator, name: "heightUpdate")
         config.userContentController.add(coordinator, name: "log")
+        config.userContentController.add(coordinator, name: "urlClicked")
         config.userContentController.add(coordinator, name: "codeAction")
         config.userContentController.addUserScript(cssScript)
         
@@ -285,6 +312,12 @@ public class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate
             guard let code = message.body as? String else { return }
             DispatchQueue.main.async {
                 self.parent.onCodeAction?(code)
+            }
+        }
+        if message.name == "urlClicked" {
+            guard let url = message.body as? String else { return }
+            DispatchQueue.main.async {
+                self.parent.onUrlClicked(url)
             }
         }
     }

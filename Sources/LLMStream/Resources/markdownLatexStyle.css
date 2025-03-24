@@ -400,3 +400,29 @@ u {
     background-color: #fff0f0;
     border: 1px solid #e8c0c0;
 }
+
+/* Citations */
+.citation {
+    display: inline-block;
+    background-color: var(--citation-background-color);
+    border-radius: var(--citation-border-radius);
+    padding: var(--citation-padding);
+    margin: var(--citation-margin);
+    cursor: pointer;
+    font-size: var(--font-size);
+    position: relative;
+    text-decoration: none;
+    color: var(--citation-text-color);
+    transition: background-color 0.2s ease, transform 0.1s ease, color 0.2s ease;
+}
+
+.citation:hover {
+    background-color: var(--citation-hover-background-color);
+    text-decoration: none;
+    color: var(--citation-hover-text-color);
+    transform: translateY(-1px);
+}
+
+.citation:active {
+    transform: translateY(0px);
+}

@@ -11,6 +11,7 @@ public struct LLMStreamConfiguration {
     public var animation: AnimationConfiguration
     public var codeBlock: CodeBlockConfiguration
     public var table: TableConfiguration
+    public var citation: CitationConfiguration
     
     // MARK: - Initializer
     
@@ -21,7 +22,8 @@ public struct LLMStreamConfiguration {
         thought: ThoughtConfiguration = ThoughtConfiguration(),
         animation: AnimationConfiguration = AnimationConfiguration(),
         codeBlock: CodeBlockConfiguration = CodeBlockConfiguration(),
-        table: TableConfiguration = TableConfiguration()
+        table: TableConfiguration = TableConfiguration(),
+        citation: CitationConfiguration = CitationConfiguration()
     ) {
         self.font = font
         self.colors = colors
@@ -30,6 +32,7 @@ public struct LLMStreamConfiguration {
         self.animation = animation
         self.codeBlock = codeBlock
         self.table = table
+        self.citation = citation
     }
     
     // MARK: - Preset Themes
