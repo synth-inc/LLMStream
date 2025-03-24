@@ -6,19 +6,19 @@ LLMStream is a powerful iOS/macOS Swift Package that provides a customizable Web
 
 - 🤔 **Thinking State** - Elegant loading state when response contains `<think>` tag
 
-![thinking-state](https://github.com/user-attachments/assets/94ce3563-dcd8-4e5b-9584-3dc8ad31ea88)
+<img width="1000" alt="thinking-state-small-2x" src="https://github.com/user-attachments/assets/0332e886-dfab-49b6-ac7c-f56755911ecf" />
 
 - 📝 **Markdown Support** - Complete Markdown rendering with inline formatting and nested lists
 - 💻 **Code Highlighting** - Syntax highlighting for multiple programming languages with convenient copy functionality
 
-![syntax-highlight](https://github.com/user-attachments/assets/23c69e70-2eed-45f1-aac3-9c260d876831)
+<img width="1000" alt="syntax-highlight-small-2x" src="https://github.com/user-attachments/assets/599cbc4b-cbdc-459b-b0d5-0e39f6256f3a" />
 
 - ⚡ **LaTeX Integration** - Seamless rendering of mathematical expressions:
   - Inline expressions using `$...$`
   - Display math using `\[...\]`
   - Partial document rendering
 
-![LaTeX](https://github.com/user-attachments/assets/38662c68-71be-4a1f-bd64-012c8eab2820)
+<img width="1000" alt="LaTeX-small-2x" src="https://github.com/user-attachments/assets/178d8b8e-8363-4eca-a586-c81753ae3dd0" />
 
 - 🔄 **Real-time Updates** - Smooth content updates without flickering
 - 🎨 **Customizable Styling** - Flexible appearance configuration
