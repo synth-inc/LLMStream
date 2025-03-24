@@ -21,6 +21,12 @@ public struct ColorConfiguration {
     public var theoremBorderColor: Color
     public var proofBorderColor: Color
     
+    /// Citation
+    public var citationBackgroundColor: Color
+    public var citationHoverBackgroundColor: Color
+    public var citationTextColor: Color
+    public var citationHoverTextColor: Color
+    
     public init(
         textColor: Color = .white,
         backgroundColor: Color = .clear,
@@ -33,7 +39,11 @@ public struct ColorConfiguration {
         tableRowEvenColor: Color = Color(white: 0.2).opacity(0.2),
         tableRowHoverColor: Color = Color(white: 0.27).opacity(0.3),
         theoremBorderColor: Color = Color(red: 0.29, green: 0.60, blue: 1.0),
-        proofBorderColor: Color = Color(white: 0.47)
+        proofBorderColor: Color = Color(white: 0.47),
+        citationBackgroundColor: Color = Color(red: 0.15, green: 0.15, blue: 0.15),
+        citationHoverBackgroundColor: Color = Color(red: 0.15, green: 0.15, blue: 0.15),
+        citationTextColor: Color = .white,
+        citationHoverTextColor: Color = .white
     ) {
         self.textColor = textColor
         self.backgroundColor = backgroundColor
@@ -47,5 +57,9 @@ public struct ColorConfiguration {
         self.tableRowHoverColor = tableRowHoverColor
         self.theoremBorderColor = theoremBorderColor
         self.proofBorderColor = proofBorderColor
+        self.citationBackgroundColor = citationBackgroundColor
+        self.citationHoverBackgroundColor = citationHoverBackgroundColor
+        self.citationTextColor = citationTextColor
+        self.citationHoverTextColor = citationHoverTextColor
     }
 }

@@ -146,25 +146,23 @@ private extension MarkdownLatexViewShared {
             --table-row-hover-color: \(configuration.colors.tableRowHoverColor.cssString);
             --theorem-border-color: \(configuration.colors.theoremBorderColor.cssString);
             --proof-border-color: \(configuration.colors.proofBorderColor.cssString);
-            
-            /* Citation Configuration */
-            --citation-background-color: \(configuration.citation.backgroundColor.cssString);
-            --citation-hover-background-color: \(configuration.citation.hoverBackgroundColor.cssString);
-            --citation-text-color: \(configuration.citation.textColor.cssString);
-            --citation-hover-text-color: \(configuration.citation.hoverTextColor.cssString);
-            --citation-border-radius: \(configuration.citation.borderRadius)px;
-            --citation-padding: \(configuration.citation.padding.top)px \(configuration.citation.padding.trailing)px \(configuration.citation.padding.bottom)px \(configuration.citation.padding.leading)px;
-            --citation-margin: \(configuration.citation.margin.top)px \(configuration.citation.margin.trailing)px \(configuration.citation.margin.bottom)px \(configuration.citation.margin.leading)px;
+            --citation-background-color: \(configuration.colors.citationBackgroundColor.cssString);
+            --citation-hover-background-color: \(configuration.colors.citationHoverBackgroundColor.cssString);
+            --citation-text-color: \(configuration.colors.citationTextColor.cssString);
+            --citation-hover-text-color: \(configuration.colors.citationHoverTextColor.cssString);
             
             /* Layout Configuration */
             --content-padding: \(configuration.layout.contentPadding.top)px \(configuration.layout.contentPadding.trailing)px \(configuration.layout.contentPadding.bottom)px \(configuration.layout.contentPadding.leading)px;
             --code-padding: \(configuration.layout.codePadding.top)px \(configuration.layout.codePadding.trailing)px \(configuration.layout.codePadding.bottom)px \(configuration.layout.codePadding.leading)px;
             --thought-padding: \(configuration.layout.thoughtPadding.top)px \(configuration.layout.thoughtPadding.trailing)px \(configuration.layout.thoughtPadding.bottom)px \(configuration.layout.thoughtPadding.leading)px;
             --table-padding: \(configuration.layout.tablePadding.top)px \(configuration.layout.tablePadding.trailing)px \(configuration.layout.tablePadding.bottom)px \(configuration.layout.tablePadding.leading)px;
+            --citation-padding: \(configuration.layout.citationPadding.top)px \(configuration.layout.citationPadding.trailing)px \(configuration.layout.citationPadding.bottom)px \(configuration.layout.citationPadding.leading)px;
+            --citation-margin: \(configuration.layout.citationMargin.top)px \(configuration.layout.citationMargin.trailing)px \(configuration.layout.citationMargin.bottom)px \(configuration.layout.citationMargin.leading)px;
             --spacing: \(configuration.layout.spacing)px;
             --corner-radius: \(configuration.layout.cornerRadius)px;
             --table-corner-radius: \(configuration.layout.tableCornerRadius)px;
             --theorem-corner-radius: \(configuration.layout.theoremCornerRadius)px;
+            --citation-border-radius: \(configuration.layout.citationBorderRadius)px;
             
             /* Code Block Configuration */
             --show-language: \(configuration.codeBlock.showLanguage ? "flex" : "none");
