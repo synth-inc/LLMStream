@@ -5,6 +5,8 @@
 //  Created by Kévin Naudin on 20/03/2025.
 //
 
+import SwiftUI
+
 public struct CitationConfiguration {
     // MARK: - Properties
     
