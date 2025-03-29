@@ -132,6 +132,7 @@ private extension MarkdownLatexViewShared {
             --code-font-family: \(configuration.font.codeFontFamily);
             --table-font-family: \(configuration.font.tableFontFamily);
             --math-font-family: \(configuration.font.mathFontFamily);
+            --citation-font-size: \(Int(configuration.font.size * configuration.colors.citationFontSizeRatio))px;
             
             /* Color Configuration */
             --text-color: \(configuration.colors.textColor.cssString);

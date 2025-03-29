@@ -26,6 +26,7 @@ public struct ColorConfiguration {
     public var citationHoverBackgroundColor: Color
     public var citationTextColor: Color
     public var citationHoverTextColor: Color
+    public var citationFontSizeRatio: Double
     
     public init(
         textColor: Color = .white,
@@ -43,7 +44,8 @@ public struct ColorConfiguration {
         citationBackgroundColor: Color = Color(red: 0.15, green: 0.15, blue: 0.15),
         citationHoverBackgroundColor: Color = Color(red: 0.15, green: 0.15, blue: 0.15),
         citationTextColor: Color = .white,
-        citationHoverTextColor: Color = .white
+        citationHoverTextColor: Color = .white,
+        citationFontSizeRatio: Double = 0.8
     ) {
         self.textColor = textColor
         self.backgroundColor = backgroundColor
@@ -61,5 +63,6 @@ public struct ColorConfiguration {
         self.citationHoverBackgroundColor = citationHoverBackgroundColor
         self.citationTextColor = citationTextColor
         self.citationHoverTextColor = citationHoverTextColor
+        self.citationFontSizeRatio = citationFontSizeRatio
     }
 }

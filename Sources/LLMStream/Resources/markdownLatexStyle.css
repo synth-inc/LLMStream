@@ -409,7 +409,7 @@ u {
     padding: var(--citation-padding);
     margin: var(--citation-margin);
     cursor: pointer;
-    font-size: var(--font-size);
+    font-size: var(--citation-font-size);
     position: relative;
     text-decoration: none;
     color: var(--citation-text-color);
