@@ -78,10 +78,8 @@ public struct MarkdownLatexViewMacOS: NSViewRepresentable, @preconcurrency Markd
     }
 
     public func updateNSView(_ webView: WKWebView, context: Context) {
-        if context.coordinator.lastContent != content {
-            context.coordinator.lastContent = content
-            loadHTML(in: webView)
-        }
+        context.coordinator.lastContent = content
+        loadHTML(in: webView)
     }
 }
 #endif
