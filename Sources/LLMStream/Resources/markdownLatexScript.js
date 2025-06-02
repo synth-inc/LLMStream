@@ -431,7 +431,15 @@ document.addEventListener("DOMContentLoaded", function () {
         typographer: true,
         listIndent: 1,
         maxNesting: 100
-    }).use(markdownLatexPlugin);
+    })
+    .use(window.markdownitLinkAttributes, {
+        pattern: /^https?:\/\//,
+        attrs: {
+            target: '_blank',
+            rel: 'noopener'
+        }
+    })
+    .use(markdownLatexPlugin);
 
     renderMarkdown();
     

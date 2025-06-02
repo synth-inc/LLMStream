@@ -213,6 +213,7 @@ private extension MarkdownLatexViewShared {
         
         let webView = VerticalScrollPassthroughWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = coordinator
+        webView.uiDelegate = coordinator
         #if os(macOS)
         webView.setValue(false, forKey: "drawsBackground")
         webView.allowsMagnification = false
@@ -270,7 +271,7 @@ private extension MarkdownLatexViewShared {
 }
 
 // Common Coordinator class
-public class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate {
+public class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate {
     #if os(iOS)
     var parent: MarkdownLatexViewiOS
     
@@ -323,5 +324,29 @@ public class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
             webView.evaluateJavaScript("updateHeight();")
         }
+    }
+    
+    public func webView(_ webView: WKWebView,
+                        decidePolicyFor navigationAction: WKNavigationAction,
+                        decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
+
+        if let url = navigationAction.request.url,
+           navigationAction.navigationType == .linkActivated {
+            NSWorkspace.shared.open(url)
+            decisionHandler(.cancel)
+        } else {
+            decisionHandler(.allow)
+        }
+    }
+    
+    public func webView(_ webView: WKWebView,
+                        createWebViewWith configuration: WKWebViewConfiguration,
+                        for navigationAction: WKNavigationAction,
+                        windowFeatures: WKWindowFeatures) -> WKWebView? {
+        if let url = navigationAction.request.url {
+            NSWorkspace.shared.open(url)
+        }
+        
+        return nil
     }
 }
