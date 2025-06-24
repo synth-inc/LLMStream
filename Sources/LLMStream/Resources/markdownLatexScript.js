@@ -2,6 +2,16 @@ window.markdownContent = window.markdownContent || "";
 window.lastProcessedContent = window.lastProcessedContent || "";
 let md;
 
+// Add a global copy event handler to force plain text copy
+window.addEventListener('copy', function(e) {
+    const selection = window.getSelection();
+    if (!selection) return;
+    const text = selection.toString();
+    // Set clipboard data to plain text only
+    e.clipboardData.setData('text/plain', text);
+    e.preventDefault(); // Prevent default copy behavior (which includes HTML)
+});
+
 function updateHeight() {
     let height = document.documentElement.scrollHeight;
 
