@@ -325,28 +325,35 @@ public class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate
             webView.evaluateJavaScript("updateHeight();")
         }
     }
-    
+
     public func webView(_ webView: WKWebView,
                         decidePolicyFor navigationAction: WKNavigationAction,
-                        decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-
+                        decisionHandler: @escaping @MainActor @Sendable (WKNavigationActionPolicy) -> Void) {
         if let url = navigationAction.request.url,
            navigationAction.navigationType == .linkActivated {
+            #if os(macOS)
             NSWorkspace.shared.open(url)
+            #else
+            UIApplication.shared.open(url)
+            #endif
             decisionHandler(.cancel)
         } else {
             decisionHandler(.allow)
         }
     }
-    
+
+
     public func webView(_ webView: WKWebView,
                         createWebViewWith configuration: WKWebViewConfiguration,
                         for navigationAction: WKNavigationAction,
                         windowFeatures: WKWindowFeatures) -> WKWebView? {
         if let url = navigationAction.request.url {
+            #if os(macOS)
             NSWorkspace.shared.open(url)
+            #else
+            UIApplication.shared.open(url)
+            #endif
         }
-        
         return nil
     }
 }
